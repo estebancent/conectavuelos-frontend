@@ -29,12 +29,13 @@ const errores = ref({
   destino: false,
   fecha: false
 })
+const mensajeError = ref('')
 
 const vuelos = ref([])
 const cargando = ref(false)
 const busquedaRealizada = ref(false)
 
-// NUEVO: Estado para el filtro
+//  Estado para el filtro
 const precioMaximo = ref(300000)
 
 // --- LÓGICA DE FILTRADO Y PROCESAMIENTO ---
@@ -63,34 +64,47 @@ onMounted(() => {
 })
 
 const validarCampos = () => {
+  // Reiniciamos los errores antes de validar
   errores.value.origen = !form.value.origen
   errores.value.destino = !form.value.destino
   errores.value.fecha = !form.value.fecha
   
+  // Si hay algún error, devolvemos false
   return !errores.value.origen && !errores.value.destino && !errores.value.fecha
 }
 
 const handleSearch = async () => {
   if (!validarCampos()) return
-  
+
   cargando.value = true
   busquedaRealizada.value = true
-  
+
+  vuelos.value = []
+  mensajeError.value = '' // limpiamos errores anteriores
+
   try {
     const { data } = await buscarVuelos({
       origen: form.value.origen,
       destino: form.value.destino,
       fecha: form.value.fecha
     })
+
     vuelos.value = data
-    
-    // Resetear el filtro al máximo al hacer una nueva búsqueda
+
     if (data.length > 0) {
       const precios = data.map(v => v.precio)
       precioMaximo.value = Math.max(...precios)
     }
+
   } catch (error) {
+
     console.error("Error buscando vuelos:", error)
+
+    // Captura el mensaje enviado por Laravel
+    mensajeError.value =
+      error.response?.data?.error ||
+      'Ocurrió un error inesperado'
+
   } finally {
     cargando.value = false
   }
@@ -108,56 +122,65 @@ const handleSearch = async () => {
 
       <div class="w-full max-w-5xl mt-12 bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-          
-          <div class="flex flex-col text-left">
-            <label class="text-xs font-black uppercase text-blue-600 mb-2 ml-1">Origen</label>
-            <div class="relative">
-              <MapPin class="absolute left-4 top-3.5 w-5 h-5" :class="errores.origen ? 'text-red-500' : 'text-slate-400'" />
-              <select v-model="form.origen" 
-                class="input-field-custom appearance-none"
-                :class="{'ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10': errores.origen}">
-                <option value="" disabled>¿De dónde salís?</option>
-                <option v-for="item in aeropuertoStore.listaFormateada" :key="item.id" :value="item.id">
-                  {{ item.label }}
-                </option>
-              </select>
-            </div>
-          </div>
+  
+  <div class="flex flex-col text-left">
+    <label class="text-xs font-black uppercase text-blue-600 mb-2 ml-1">Origen</label>
+    <div class="relative">
+      <MapPin class="absolute left-4 top-3.5 w-5 h-5" :class="errores.origen ? 'text-red-500' : 'text-slate-400'" />
+      <select v-model="form.origen" 
+        class="input-field-custom appearance-none"
+        :class="{'ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10': errores.origen}">
+        <option value="" disabled>¿De dónde salís?</option>
+        <option v-for="item in aeropuertoStore.listaFormateada" :key="item.id" :value="item.id">
+          {{ item.label }}
+        </option>
+      </select>
+    </div>
+    <p v-if="errores.origen" class="text-[10px] text-red-500 font-bold mt-1 ml-1 animate-pulse">
+      Debe seleccionar un origen
+    </p>
+  </div>
 
-          <div class="flex flex-col text-left">
-            <label class="text-xs font-black uppercase text-blue-600 mb-2 ml-1">Destino</label>
-            <div class="relative">
-              <PlaneLanding class="absolute left-4 top-3.5 w-5 h-5" :class="errores.destino ? 'text-red-500' : 'text-slate-400'" />
-              <select v-model="form.destino" 
-                class="input-field-custom appearance-none"
-                :class="{'ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10': errores.destino}">
-                <option value="" disabled>¿A dónde vas?</option>
-                <option v-for="item in aeropuertoStore.listaFormateada" :key="item.id" :value="item.id">
-                  {{ item.label }}
-                </option>
-              </select>
-            </div>
-          </div>
+  <div class="flex flex-col text-left">
+    <label class="text-xs font-black uppercase text-blue-600 mb-2 ml-1">Destino</label>
+    <div class="relative">
+      <PlaneLanding class="absolute left-4 top-3.5 w-5 h-5" :class="errores.destino ? 'text-red-500' : 'text-slate-400'" />
+      <select v-model="form.destino" 
+        class="input-field-custom appearance-none"
+        :class="{'ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10': errores.destino}">
+        <option value="" disabled>¿A dónde vas?</option>
+        <option v-for="item in aeropuertoStore.listaFormateada" :key="item.id" :value="item.id">
+          {{ item.label }}
+        </option>
+      </select>
+    </div>
+    <p v-if="errores.destino" class="text-[10px] text-red-500 font-bold mt-1 ml-1 animate-pulse">
+      Debe seleccionar un destino
+    </p>
+  </div>
 
-          <div class="flex flex-col text-left">
-            <label class="text-xs font-black uppercase text-blue-600 mb-2 ml-1">Fecha</label>
-            <div class="relative">
-              <Calendar class="absolute left-4 top-3.5 w-5 h-5" :class="errores.fecha ? 'text-red-500' : 'text-slate-400'" />
-              <input v-model="form.fecha" type="date" 
-                class="input-field-custom"
-                :class="{'ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10': errores.fecha}">
-            </div>
-          </div>
+  <div class="flex flex-col text-left">
+    <label class="text-xs font-black uppercase text-blue-600 mb-2 ml-1">Fecha</label>
+    <div class="relative">
+      <Calendar class="absolute left-4 top-3.5 w-5 h-5" :class="errores.fecha ? 'text-red-500' : 'text-slate-400'" />
+      <input v-model="form.fecha" type="date" 
+        class="input-field-custom"
+        :class="{'ring-2 ring-red-500 bg-red-50 dark:bg-red-900/10': errores.fecha}">
+    </div>
+    <p v-if="errores.fecha" class="text-[10px] text-red-500 font-bold mt-1 ml-1 animate-pulse">
+      Debe elegir una fecha
+    </p>
+  </div>
 
-          <div class="flex items-end">
-            <button @click="handleSearch" :disabled="cargando" class="search-button-custom">
-              <Loader2 v-if="cargando" class="w-5 h-5 animate-spin" />
-              <template v-else>
-                <Search class="w-5 h-5" /> Buscar Vuelos
-              </template>
-            </button>
-          </div>
-        </div>
+  <div class="flex items-end">
+    <button @click="handleSearch" :disabled="cargando" class="search-button-custom">
+      <Loader2 v-if="cargando" class="w-5 h-5 animate-spin" />
+      <template v-else>
+        <Search class="w-5 h-5" /> Buscar Vuelos
+      </template>
+    </button>
+  </div>
+</div>
       </div>
     </section>
 
@@ -276,11 +299,20 @@ const handleSearch = async () => {
         </div>
       </div>
 
-      <div v-else class="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800">
-        <Info class="w-12 h-12 text-slate-300 mx-auto mb-4" />
-        <h4 class="text-xl font-bold text-slate-800 dark:text-white">No hay vuelos disponibles</h4>
-        <p class="text-slate-500 mt-2">Probá buscando con otro destino u otra fecha.</p>
-      </div>
+      <div
+  v-else
+  class="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800"
+>
+  <Info class="w-12 h-12 text-slate-300 mx-auto mb-4" />
+
+  <h4 class="text-xl font-bold text-slate-800 dark:text-white">
+    {{ mensajeError || 'No hay vuelos disponibles' }}
+  </h4>
+
+  <p class="text-slate-500 mt-2">
+    Probá buscando con otro destino u otra fecha.
+  </p>
+</div>
 
     </section>
   </div>

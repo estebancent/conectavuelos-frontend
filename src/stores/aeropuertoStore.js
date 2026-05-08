@@ -21,7 +21,7 @@ export const useAeropuertoStore = defineStore('aeropuerto', {
     }
   },
   
-  // stores/aeropuertoStore.js
+
 getters: {
   listaFormateada: (state) => {
     return state.aeropuertos.map(aero => ({
