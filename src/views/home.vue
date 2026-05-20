@@ -300,19 +300,19 @@ const handleSearch = async () => {
       </div>
 
       <div
-  v-else
-  class="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800"
->
-  <Info class="w-12 h-12 text-slate-300 mx-auto mb-4" />
+        v-else
+        class="text-center py-20 bg-slate-50 dark:bg-slate-900/50 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800"
+      >
+        <Info class="w-12 h-12 text-slate-300 mx-auto mb-4" />
 
-  <h4 class="text-xl font-bold text-slate-800 dark:text-white">
-    {{ mensajeError || 'No hay vuelos disponibles' }}
-  </h4>
+        <h4 class="text-xl font-bold text-slate-800 dark:text-white">
+          {{ mensajeError || 'No hay vuelos disponibles' }}
+        </h4>
 
-  <p class="text-slate-500 mt-2">
-    Probá buscando con otro destino u otra fecha.
-  </p>
-</div>
+        <p class="text-slate-500 mt-2">
+          Probá buscando con otro destino u otra fecha.
+        </p>
+      </div>
 
     </section>
   </div>
