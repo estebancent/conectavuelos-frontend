@@ -13,6 +13,10 @@ export default {
 
   me() {
     return api.get('/me')
+  },
+  //  Trae el historial de reservas que el usuario compró
+  obtenerMisReservas() {
+    return api.get('/user/reservas/mis-vuelos')
   }
 
 }

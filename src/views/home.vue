@@ -2,6 +2,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { buscarVuelos } from '../services/vueloService' 
 import { useAeropuertoStore } from '../stores/aeropuertoStore'
+import { useRouter } from 'vue-router'
+import { useReservaStore } from '../stores/reservaStore'
 import { 
   MapPin, 
   PlaneLanding, 
@@ -14,6 +16,14 @@ import {
   Star,
   Tag
 } from 'lucide-vue-next'
+
+const router = useRouter()
+const reservaStore = useReservaStore()
+
+const seleccionarVuelo = (vuelo) => {
+  reservaStore.setVuelo(vuelo)
+  router.push('/reservar') // Ruta del asistente de reserva
+}
 
 const aeropuertoStore = useAeropuertoStore()
 
@@ -43,19 +53,27 @@ const vuelosProcesados = computed(() => {
   if (vuelos.value.length === 0) return []
   
   // 1. Filtrar por el precio del slider
-  const filtrados = vuelos.value.filter(v => v.precio <= precioMaximo.value)
+  const filtrados = vuelos.value.filter(v => Number(v.precio) <= precioMaximo.value)
   
   if (filtrados.length === 0) return []
 
   // 2. Identificar el precio más bajo entre los que quedaron
-  const precios = filtrados.map(v => v.precio)
+  const precios = filtrados.map(v => Number(v.precio))
   const precioMinimo = Math.min(...precios)
   
-  return filtrados.map(v => ({
-    ...v,
-    esElMasBarato: v.precio === precioMinimo,
-    esRecomendado: v.precio === precioMinimo && v.aerolinea.includes('Aerolíneas')
-  }))
+  return filtrados.map(v => {
+    const precioVuelo = Number(v.precio)
+    
+    // Verificamos si existe la propiedad nro_vuelo para deducir la aerolínea de forma segura (Ej: AR1500 -> Aerolíneas)
+    const esAerolineas = v.nro_vuelo && v.nro_vuelo.startsWith('AR')
+
+    return {
+      ...v,
+      esElMasBarato: precioVuelo === precioMinimo,
+      // ➔ Cambiamos el .includes() roto por la validación segura del prefijo del vuelo
+      esRecomendado: precioVuelo === precioMinimo && esAerolineas
+    }
+  })
 })
 
 // --- ACCIONES ---
@@ -83,28 +101,27 @@ const handleSearch = async () => {
   mensajeError.value = '' // limpiamos errores anteriores
 
   try {
+    // ➔ SINCRONIZAMOS: Mandamos 'fecha_salida' que es lo que espera Laravel en el request
     const { data } = await buscarVuelos({
       origen: form.value.origen,
       destino: form.value.destino,
-      fecha: form.value.fecha
+      fecha_salida: form.value.fecha 
     })
 
     vuelos.value = data
 
     if (data.length > 0) {
-      const precios = data.map(v => v.precio)
+      const precios = data.map(v => Number(v.precio))
       precioMaximo.value = Math.max(...precios)
     }
 
   } catch (error) {
-
     console.error("Error buscando vuelos:", error)
 
     // Captura el mensaje enviado por Laravel
     mensajeError.value =
       error.response?.data?.error ||
       'Ocurrió un error inesperado'
-
   } finally {
     cargando.value = false
   }
@@ -261,6 +278,7 @@ const handleSearch = async () => {
                 <div class="text-center">
                   <p class="text-3xl font-black text-slate-800 dark:text-white uppercase">{{ vuelo.origen.substring(0,3) }}</p>
                   <p class="text-[10px] font-bold text-slate-400 uppercase">{{ vuelo.origen }}</p>
+                       <p class="text-[10px] font-bold text-slate-400 uppercase">{{ vuelo.fecha_salida }}</p>
                 </div>
                 <div class="flex flex-col items-center gap-1">
                   <div class="px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full text-[9px] font-black text-slate-500 uppercase">Directo</div>
@@ -272,6 +290,7 @@ const handleSearch = async () => {
                 <div class="text-center">
                   <p class="text-3xl font-black text-slate-800 dark:text-white uppercase">{{ vuelo.destino.substring(0,3) }}</p>
                   <p class="text-[10px] font-bold text-slate-400 uppercase">{{ vuelo.destino }}</p>
+                     <p class="text-[10px] font-bold text-slate-400 uppercase">{{ vuelo.fecha_llegada }}</p>
                 </div>
               </div>
 
@@ -282,7 +301,7 @@ const handleSearch = async () => {
                     ${{ vuelo.precio.toLocaleString() }}
                   </p>
                 </div>
-                <button class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl font-black text-sm hover:bg-blue-600 dark:hover:bg-blue-600 dark:hover:text-white transition-all flex items-center gap-2 group-hover:translate-x-1">
+                <button @click="seleccionarVuelo(vuelo)" class="bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-8 py-4 rounded-2xl font-black text-sm hover:bg-blue-600 dark:hover:bg-blue-600 dark:hover:text-white transition-all flex items-center gap-2 group-hover:translate-x-1">
                   Seleccionar <ChevronRight class="w-4 h-4" />
                 </button>
               </div>

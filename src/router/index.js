@@ -2,11 +2,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/authStore'
 
 import Home from '../views/home.vue'
+import ReservaView from '../views/ReservaView.vue'
 
 // Layouts
 import AuthLayout from '../layouts/authLayout.vue'
 import AdminLayout from '../layouts/adminLayout.vue'
-import publicLayout from '../layouts/publicLayout.vue'
+import PublicLayout from '../layouts/publicLayout.vue'
 // Views
 import Login from '../views/auth/login.vue'
 import Register from '../views/auth/register.vue'
@@ -23,7 +24,7 @@ import Brands from '../views/admin/brands.vue'
 import Suppliers from '../views/admin/suppliers.vue'
 import Sales from '../views/admin/sales.vue'
 import Purchases from '../views/admin/purchases.vue'
-import PublicLayout from '../layouts/publicLayout.vue'
+
 
 const routes = [
     {  
@@ -46,7 +47,14 @@ const routes = [
       {
         path: 'reservas',
         component: Reservas
-      }
+      },
+      {
+    path: '/reservar',
+    name: 'reserva',
+    component: ReservaView
+    // Pro tip: Podrías meter un guard de navegación aquí para que si 
+    // reservaStore.vueloSeleccionado es null, te redirija al Home.
+  }
     ]
         },
         // AUTH
