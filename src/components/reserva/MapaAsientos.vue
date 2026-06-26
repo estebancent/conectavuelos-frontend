@@ -76,6 +76,7 @@ const puedeAvanzar = computed(() => {
 
 const handleSiguiente = () => {
   if (!puedeAvanzar.value) return
+  reservaStore.guardarPasajeros(listaPasajeros.value)
   reservaStore.guardarAsientos(asientoStore.asientosSeleccionados)
   emit('siguiente')
 }
@@ -186,7 +187,7 @@ const obtenerStylePorClase = (asiento) => {
           </div>
           <div class="flex items-center gap-1.5">
             <span class="w-4 h-4 rounded bg-white border border-slate-200 block"></span>
-            Clase Turista
+            Clase Economica
           </div>
           <div class="flex items-center gap-1.5">
             <span class="w-4 h-4 rounded bg-blue-600 block"></span>
@@ -291,7 +292,7 @@ const obtenerStylePorClase = (asiento) => {
     <label class="flex items-center gap-2 text-xs text-slate-300 font-medium cursor-pointer select-none">
       <input 
         type="checkbox" 
-        v-model="pasajero.equipaje_extra"
+        v-model="pasajero.equipaje_extra" 
         class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-600 bg-slate-700"
       />
       <span>💼 Equipaje extra (Hasta 15kg)</span>

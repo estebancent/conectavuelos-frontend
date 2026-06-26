@@ -86,7 +86,7 @@ const totalEquipajeAdicional = computed(() => {
 })
 
 const tasasImpuestos = computed(() => (subtotalPasajes.value + totalEquipajeAdicional.value) * 0.15)
-const totalAPagar = computed(() => subtotalPasajes.value + totalEquipajeAdicional.value + tasasImpuestos.value)
+const totalAPagar = computed(() => subtotalPasajes.value + totalEquipajeAdicional.value)
 
 // --- VALIDACIONES DE FRONTEND ---
 const validarCampos = () => {
@@ -176,7 +176,7 @@ const iniciarPago = async () => {
               @click="simularTarjetaValida"
               class="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5 transition-all shadow-sm"
             >
-              <Sparkles class="w-3.5 h-3.5" /> Autocompletar Test
+              <Sparkles class="w-3.5 h-3.5" /> Autocompletar Tarjeta Válida
             </button>
           </div>
 
@@ -258,10 +258,7 @@ const iniciarPago = async () => {
               <span class="font-bold">+${{ totalEquipajeAdicional.toLocaleString('es-AR') }}</span>
             </div>
 
-            <div class="flex justify-between">
-              <span>Tasas e Impuestos (15%)</span>
-              <span class="font-bold text-slate-800 dark:text-white">${{ tasasImpuestos.toLocaleString('es-AR') }}</span>
-            </div>
+         
             
             <hr class="border-slate-200 dark:border-slate-800 my-2" />
             

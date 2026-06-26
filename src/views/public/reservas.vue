@@ -52,6 +52,7 @@
               <div class="flex justify-between items-center text-sm">
                 <div class="flex items-center gap-2">
                   <Plane class="w-4 h-4 text-slate-400 rotate-90" />
+                  <span class="font-black text-slate-800 dark:text-slate-200">{{ vuelo.codigo_vuelo }}</span>
                   <span class="font-black text-slate-800 dark:text-slate-200">{{ vuelo.origen }} ➔ {{ vuelo.destino }}</span>
                 </div>
                 

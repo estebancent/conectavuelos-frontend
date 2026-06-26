@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 // ➔ AGREGÁ ESTA IMPORTACIÓN ACÁ ARRIBA:
 import { obtenerAsientosPorVuelo } from '../services/asientoService' 
-// Nota: Si tus carpetas están a otro nivel, fijate si lleva dos puntos "../../services/asientoService"
+
 
 export const useAsientoStore = defineStore('asiento', {
   state: () => ({

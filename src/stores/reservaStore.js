@@ -60,6 +60,7 @@ const payload = {
   
   // Enviamos los datos del mock para que Laravel los registre si no los tiene
   vuelo_datos: {
+    codigo_vuelo: this.vueloSeleccionado.codigo_vuelo,
     origen: this.vueloSeleccionado.origen || 'BUE',
     destino: this.vueloSeleccionado.destino || 'CNQ',
     precio: this.vueloSeleccionado.precio || 0,
